@@ -1,11 +1,11 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "Obsidian-Sync-Memos",
+	"name": "Sync Memos",
 	"version": "1.0.0",
-	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"minAppVersion": "0.1.0",
+	"description": "同步云端Memos到日记中, 可与Thino插件配合",
+	"author": "DevQiaoYu",
+	"authorUrl": "",
+	"fundingUrl": "",
 	"isDesktopOnly": false
 }
