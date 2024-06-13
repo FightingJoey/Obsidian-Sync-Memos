@@ -1,6 +1,6 @@
 {
 	"name": "Obsidian-Sync-Memos",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "同步云端Memos到日记中, 可与Thino插件配合",
 	"main": "main.js",
 	"scripts": {

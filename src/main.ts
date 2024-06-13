@@ -94,17 +94,6 @@ class SyncMemosSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Memos Resource Path')
-			.setDesc('The usememos resource save path')
-			.addText(text => text
-				.setPlaceholder('')
-				.setValue(this.plugin.settings.memosResourcePath)
-				.onChange(async (value) => {
-					this.plugin.settings.memosResourcePath = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
 			.setName('Daliy Record Header')
 			.setDesc('将Memos插入到哪个标题下')
 			.addText(text => text

@@ -1,7 +1,6 @@
 export interface MemosSettings {
     memosAPI: string;
 	memosToken: string;
-    memosResourcePath: string;
 	dailyRecordHeader: string;
 	periodicNotesPath: string;
     periodicNotesTemplatePath: string;
@@ -11,7 +10,6 @@ export interface MemosSettings {
 export const DEFAULT_MEMOS_SETTINGS: MemosSettings = {
     memosAPI: "",
     memosToken: "",
-    memosResourcePath: "",
     dailyRecordHeader: "",
     periodicNotesPath: "",
     periodicNotesTemplatePath: "",
