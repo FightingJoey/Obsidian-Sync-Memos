@@ -1,8 +1,8 @@
 {
 	"id": "Obsidian-Sync-Memos",
 	"name": "Sync Memos",
-	"version": "1.0.1",
-	"minAppVersion": "1.0.1",
+	"version": "1.0.2",
+	"minAppVersion": "1.0.2",
 	"description": "同步云端Memos到日记中, 可与Thino插件配合",
 	"author": "DevQiaoYu",
 	"authorUrl": "",
