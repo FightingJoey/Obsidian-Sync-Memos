@@ -9,3 +9,5 @@
 ### 参考
 
 本插件中很大一部分代码完全粘贴自 [LifeOS](https://github.com/quanru/obsidian-lifeos) 插件，非常感谢！
+
+发现一个跟我思路挺相近的插件 [Memos Sync](https://github.com/RyoJerryYu/obsidian-memos-sync)，早知道的话就不自己写了。

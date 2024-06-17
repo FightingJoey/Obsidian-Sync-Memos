@@ -4,6 +4,8 @@ import { MemosSettings, DEFAULT_MEMOS_SETTINGS } from "./settings";
 
 import { DailyRecord } from './DailyRecord';
 
+import axios, { Axios } from 'axios';
+
 export default class SyncMemos extends Plugin {
 	settings: MemosSettings;
 	dailyRecord: DailyRecord;
@@ -90,6 +92,12 @@ class SyncMemosSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.memosToken)
 				.onChange(async (value) => {
 					this.plugin.settings.memosToken = value;
+					this.plugin.dailyRecord.axios = axios.create({
+				      headers: {
+				        Authorization: `Bearer ${value}`,
+				        Accept: 'application/json',
+				      },
+				    });
 					await this.plugin.saveSettings();
 				}));
 
