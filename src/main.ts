@@ -20,6 +20,14 @@ export default class SyncMemos extends Plugin {
 			this.dailyRecord.forceSync();
 		});
 
+		this.addCommand({
+			id: 'start-obsidian-sync-memos',
+			name: 'Sync Memos',
+			callback: () => {
+				this.dailyRecord.forceSync();
+			}
+		});
+
 		this.loadDailyRecord();
 
 		// 设置页面
