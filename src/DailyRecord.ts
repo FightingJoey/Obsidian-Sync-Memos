@@ -121,6 +121,7 @@ export class DailyRecord {
    * 强制同步：清空上次同步时间，同步所有记录
    */
   public async forceSync(): Promise<void> {
+    logMessage("开始强制同步", LogLevel.info);
     this.lastTime = "";
     await this.fetch();
   }
@@ -213,6 +214,7 @@ export class DailyRecord {
    * 只同步今日创建的 Memos
    */
   public async syncToday(): Promise<void> {
+    logMessage("开始同步今日记录", LogLevel.info);
     await this.executeSync("今日", this.getTodayStartTimestamp());
   }
 
@@ -221,6 +223,7 @@ export class DailyRecord {
    * 只同步本周一及之后创建的 Memos
    */
   public async syncWeek(): Promise<void> {
+    logMessage("开始同步本周记录", LogLevel.info);
     await this.executeSync("本周", this.getWeekStartTimestamp());
   }
 
@@ -229,6 +232,7 @@ export class DailyRecord {
    * 只同步本月1号及之后创建的 Memos
    */
   public async syncMonth(): Promise<void> {
+    logMessage("开始同步本月记录", LogLevel.info);
     await this.executeSync("本月", this.getMonthStartTimestamp());
   }
 
