@@ -62,6 +62,30 @@ export default class SyncMemos extends Plugin {
 			}
 		});
 
+		this.addCommand({
+			id: "sync-current-file-memos",
+			name: "同步当前文件 Memos",
+			callback: () => {
+				const activeFile = this.app.workspace.getActiveFile();
+				if (!activeFile) {
+					new Notice("请先打开一个文件");
+					return;
+				}
+
+				// 从文件名中提取日期
+				const fileName = activeFile.name;
+				const dateMatch = fileName.match(/^(\d{4}-\d{2}-\d{2})\.md$/);
+				
+				if (!dateMatch) {
+					new Notice("当前文件不是日记文件（格式应为 YYYY-MM-DD.md）");
+					return;
+				}
+
+				const date = dateMatch[1];
+				this.dailyRecord.syncDate(date);
+			},
+		});
+
 		this.loadDailyRecord();
 
 		// 添加设置页面

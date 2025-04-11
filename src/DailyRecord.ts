@@ -267,11 +267,63 @@ export class DailyRecord {
   }
 
   /**
+   * 同步指定日期的记录
+   * @param date 日期字符串，格式为 YYYY-MM-DD
+   */
+  public async syncDate(date: string): Promise<void> {
+    if (this.syncStatus.isSyncing) {
+      logMessage("同步正在进行中", LogLevel.warning);
+      return;
+    }
+
+    try {
+      this.syncStatus.isSyncing = true;
+      this.syncStatus.lastError = null;
+      this.updateProgress(0);
+
+      if (!this.validateSettings()) {
+        return;
+      }
+
+      // 验证日期格式
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        logMessage("日期格式错误，应为 YYYY-MM-DD", LogLevel.error);
+        return;
+      }
+
+      // 计算指定日期的开始和结束时间戳
+      const startDate = new Date(date);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(date);
+      endDate.setHours(23, 59, 59, 999);
+
+      const startTimestamp = Math.floor(startDate.getTime() / 1000);
+      const endTimestamp = Math.floor(endDate.getTime() / 1000);
+
+      this.offset = 0;
+      await this.insertDailyRecord(false, startTimestamp, endTimestamp);
+
+      this.updateProgress(100);
+      logMessage(`${date} 同步完成`, LogLevel.success);
+    } catch (error) {
+      this.syncStatus.lastError = `同步失败: ${error}`;
+      logMessage(`同步失败: ${error}`, LogLevel.error);
+    } finally {
+      this.syncStatus.isSyncing = false;
+    }
+  }
+
+  /**
    * 插入每日记录
    * @param todayOnly 是否只同步今日记录
    * @param startTimestamp 开始时间戳（秒级），用于限制同步范围
+   * @param endTimestamp 结束时间戳（秒级），用于限制同步范围
    */
-  private async insertDailyRecord(todayOnly: boolean = false, startTimestamp?: number): Promise<void> {
+  private async insertDailyRecord(
+    todayOnly: boolean = false,
+    startTimestamp?: number,
+    endTimestamp?: number
+  ): Promise<void> {
     const header = this.settings.dailyRecordHeader;
     const dailyRecordByDay: Record<string, DailyRecordData> = {};
     const records = await this.fetch();
@@ -296,6 +348,11 @@ export class DailyRecord {
       
       // 检查记录是否在指定的时间范围内
       if (recordTimestamp < effectiveStartTimestamp) {
+        continue;
+      }
+
+      // 如果指定了结束时间戳，检查是否超出范围
+      if (endTimestamp && recordTimestamp > endTimestamp) {
         continue;
       }
 
@@ -337,7 +394,7 @@ export class DailyRecord {
 
     // 继续处理下一页
     this.offset += this.limit;
-    await this.insertDailyRecord(todayOnly, startTimestamp);
+    await this.insertDailyRecord(todayOnly, startTimestamp, endTimestamp);
   }
 
   /**
