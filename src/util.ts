@@ -1,7 +1,8 @@
-import { Notice, TFile, moment } from 'obsidian';
+import { Notice, TFile } from 'obsidian';
 import type { App } from 'obsidian';
 import type { DailyRecordType, ResourceType } from './type';
 import { LogLevel } from './type';
+import moment from 'moment';
 
 export function sleep(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -97,7 +98,7 @@ export function logMessage(message: string, level: LogLevel = LogLevel.info) {
 
   if (level === LogLevel.info) {
     console.info(message);
-  } else if (level === LogLevel.warn) {
+  } else if (level === LogLevel.warning) {
     console.warn(message);
   } else if (level === LogLevel.error) {
     console.error(message);
