@@ -6,47 +6,77 @@ import { DailyRecord } from './DailyRecord';
 
 import axios, { Axios } from 'axios';
 
+/**
+ * SyncMemos 插件主类
+ * 负责插件的生命周期管理和设置界面
+ */
 export default class SyncMemos extends Plugin {
-	settings: MemosSettings;
-	dailyRecord: DailyRecord;
+	settings: MemosSettings;        // 插件设置
+	dailyRecord: DailyRecord;      // 每日记录处理器
 	// timeout: NodeJS.Timeout;
   	// interval: NodeJS.Timer;
-	file: File;
+	file: File;                    // 文件对象
 
+	/**
+	 * 插件加载时的初始化
+	 */
 	async onload() {
 		await this.loadSettings();
 
+		// 添加工具栏图标
 		const ribbonIconEl = this.addRibbonIcon('refresh-cw', 'Sync Memos', (evt: MouseEvent) => {
 			this.dailyRecord.forceSync();
 		});
 
+		// 添加强制同步命令
 		this.addCommand({
-			id: 'start-obsidian-sync-memos',
-			name: 'Sync Memos',
+			id: 'force-sync-memos',
+			name: 'Force Sync Memos',
 			callback: () => {
 				this.dailyRecord.forceSync();
 			}
 		});
 
+		// 添加同步今日记录命令
+		this.addCommand({
+			id: 'sync-today-memos',
+			name: 'Sync Today Memos',
+			callback: () => {
+				this.dailyRecord.syncToday();
+			}
+		});
+
 		this.loadDailyRecord();
 
-		// 设置页面
+		// 添加设置页面
 		this.addSettingTab(new SyncMemosSettingTab(this.app, this));
 	}
 
+	/**
+	 * 插件卸载时的清理
+	 */
 	onunload() {
 		// clearTimeout(this.timeout);
 		// clearInterval(this.interval);
 	}
 
+	/**
+	 * 加载插件设置
+	 */
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_MEMOS_SETTINGS, await this.loadData());
 	}
 
+	/**
+	 * 保存插件设置
+	 */
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
 
+	/**
+	 * 加载每日记录处理器
+	 */
 	loadDailyRecord() {
 		this.dailyRecord = new DailyRecord(
 			this.app,
@@ -66,6 +96,9 @@ export default class SyncMemos extends Plugin {
 	}
 }
 
+/**
+ * 插件设置页面类
+ */
 class SyncMemosSettingTab extends PluginSettingTab {
 	plugin: SyncMemos;
 
@@ -74,13 +107,18 @@ class SyncMemosSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
+	/**
+	 * 显示设置页面
+	 */
 	display(): void {
 		const {containerEl} = this;
 
 		containerEl.empty();
 
+		// 添加设置标题
 		new Setting(this.containerEl).setName("General Settings").setHeading();
 
+		// Memos API 设置
 		new Setting(containerEl)
 			.setName('Memos API')
 			.setDesc('The usememos service API')
@@ -92,6 +130,7 @@ class SyncMemosSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
+		// Memos Token 设置
 		new Setting(containerEl)
 			.setName('Memos Token')
 			.setDesc('The token of you service API')
@@ -109,6 +148,7 @@ class SyncMemosSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
+		// 日记标题设置
 		new Setting(containerEl)
 			.setName('Daliy Record Header')
 			.setDesc('将Memos插入到哪个标题下')
@@ -120,6 +160,7 @@ class SyncMemosSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
+		// 日记路径设置
 		new Setting(containerEl)
 			.setName('Daliy Note Path')
 			.setDesc('日记文件夹')
@@ -131,6 +172,7 @@ class SyncMemosSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
+		// 日记模板路径设置
 		new Setting(containerEl)
 			.setName('Daliy Note Template Path')
 			.setDesc('日记模板')
@@ -142,17 +184,16 @@ class SyncMemosSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
+		// 时间格式设置
 		new Setting(containerEl)
 			.setName("日记中默认前缀")
-			.setDesc(
-				"设置日记中Memos的默认前缀"
-			)
+			.setDesc("设置日记中Memos的默认前缀")
 			.addDropdown((cb) =>
 				cb
 					.addOption("HH:mm", "HH:mm")
 					.addOption("HH:mm:ss", "HH:mm:ss")
 					.setValue(this.plugin.settings.periodicNotesTimePrefix)
-					.onChange((value: "HH:mm" | "HH:mm:ss") => {
+					.onChange((value) => {
 						this.plugin.settings.periodicNotesTimePrefix = value;
 						this.plugin.saveSettings();
 					})
