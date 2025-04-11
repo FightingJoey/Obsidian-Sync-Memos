@@ -5,10 +5,11 @@ export type ResourceType = {
   uid?: string;
   id: string;
   filename: string;
+  size: number;
 };
 
 export type DailyRecordType = {
-  rowStatus: 'ARCHIVED' | 'ACTIVE' | 'NORMAL';
+  rowStatus: "ARCHIVED" | "ACTIVE" | "NORMAL";
   updatedTs: number;
   createdTs: number;
   createdAt: string;
@@ -25,7 +26,8 @@ export type FetchError = {
 };
 
 export enum LogLevel {
-  'info',
-  'warn',
-  'error',
+  info = "info",
+  error = "error",
+  warning = "warning",
+  success = "success",
 }
