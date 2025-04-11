@@ -20,7 +20,7 @@ export default class SyncMemos extends Plugin {
 		await this.loadSettings();
 
 		// 添加工具栏图标
-		const ribbonIconEl = this.addRibbonIcon('refresh-cw', 'Sync Memos', (evt: MouseEvent) => {
+		const ribbonIconEl = this.addRibbonIcon('refresh-cw', 'Sync Today Memos', (evt: MouseEvent) => {
 			this.dailyRecord.syncToday();
 		});
 
