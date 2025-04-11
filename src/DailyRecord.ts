@@ -171,10 +171,16 @@ export class DailyRecord {
   }
 
   /**
-   * 同步今日记录
-   * 只同步今日创建的 Memos
+   * 执行同步操作
+   * @param syncType 同步类型
+   * @param startTimestamp 开始时间戳（可选）
+   * @param endTimestamp 结束时间戳（可选）
    */
-  public async syncToday(): Promise<void> {
+  private async executeSync(
+    syncType: string,
+    startTimestamp?: number,
+    endTimestamp?: number
+  ): Promise<void> {
     if (this.syncStatus.isSyncing) {
       logMessage("同步正在进行中", LogLevel.warning);
       return;
@@ -190,16 +196,24 @@ export class DailyRecord {
       }
 
       this.offset = 0;
-      await this.insertDailyRecord(true);
+      await this.insertDailyRecord(false, startTimestamp, endTimestamp);
 
       this.updateProgress(100);
-      logMessage("今日同步完成", LogLevel.success);
+      logMessage(`${syncType}同步完成`, LogLevel.success);
     } catch (error) {
       this.syncStatus.lastError = `同步失败: ${error}`;
       logMessage(`同步失败: ${error}`, LogLevel.error);
     } finally {
       this.syncStatus.isSyncing = false;
     }
+  }
+
+  /**
+   * 同步今日记录
+   * 只同步今日创建的 Memos
+   */
+  public async syncToday(): Promise<void> {
+    await this.executeSync("今日", this.getTodayStartTimestamp());
   }
 
   /**
@@ -207,31 +221,7 @@ export class DailyRecord {
    * 只同步本周一及之后创建的 Memos
    */
   public async syncWeek(): Promise<void> {
-    if (this.syncStatus.isSyncing) {
-      logMessage("同步正在进行中", LogLevel.warning);
-      return;
-    }
-
-    try {
-      this.syncStatus.isSyncing = true;
-      this.syncStatus.lastError = null;
-      this.updateProgress(0);
-
-      if (!this.validateSettings()) {
-        return;
-      }
-
-      this.offset = 0;
-      await this.insertDailyRecord(false, this.getWeekStartTimestamp());
-
-      this.updateProgress(100);
-      logMessage("本周同步完成", LogLevel.success);
-    } catch (error) {
-      this.syncStatus.lastError = `同步失败: ${error}`;
-      logMessage(`同步失败: ${error}`, LogLevel.error);
-    } finally {
-      this.syncStatus.isSyncing = false;
-    }
+    await this.executeSync("本周", this.getWeekStartTimestamp());
   }
 
   /**
@@ -239,31 +229,7 @@ export class DailyRecord {
    * 只同步本月1号及之后创建的 Memos
    */
   public async syncMonth(): Promise<void> {
-    if (this.syncStatus.isSyncing) {
-      logMessage("同步正在进行中", LogLevel.warning);
-      return;
-    }
-
-    try {
-      this.syncStatus.isSyncing = true;
-      this.syncStatus.lastError = null;
-      this.updateProgress(0);
-
-      if (!this.validateSettings()) {
-        return;
-      }
-
-      this.offset = 0;
-      await this.insertDailyRecord(false, this.getMonthStartTimestamp());
-
-      this.updateProgress(100);
-      logMessage("本月同步完成", LogLevel.success);
-    } catch (error) {
-      this.syncStatus.lastError = `同步失败: ${error}`;
-      logMessage(`同步失败: ${error}`, LogLevel.error);
-    } finally {
-      this.syncStatus.isSyncing = false;
-    }
+    await this.executeSync("本月", this.getMonthStartTimestamp());
   }
 
   /**
@@ -271,46 +237,22 @@ export class DailyRecord {
    * @param date 日期字符串，格式为 YYYY-MM-DD
    */
   public async syncDate(date: string): Promise<void> {
-    if (this.syncStatus.isSyncing) {
-      logMessage("同步正在进行中", LogLevel.warning);
+    // 验证日期格式
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      logMessage("日期格式错误，应为 YYYY-MM-DD", LogLevel.error);
       return;
     }
 
-    try {
-      this.syncStatus.isSyncing = true;
-      this.syncStatus.lastError = null;
-      this.updateProgress(0);
+    // 计算指定日期的开始和结束时间戳
+    const startDate = new Date(date);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(date);
+    endDate.setHours(23, 59, 59, 999);
 
-      if (!this.validateSettings()) {
-        return;
-      }
+    const startTimestamp = Math.floor(startDate.getTime() / 1000);
+    const endTimestamp = Math.floor(endDate.getTime() / 1000);
 
-      // 验证日期格式
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-        logMessage("日期格式错误，应为 YYYY-MM-DD", LogLevel.error);
-        return;
-      }
-
-      // 计算指定日期的开始和结束时间戳
-      const startDate = new Date(date);
-      startDate.setHours(0, 0, 0, 0);
-      const endDate = new Date(date);
-      endDate.setHours(23, 59, 59, 999);
-
-      const startTimestamp = Math.floor(startDate.getTime() / 1000);
-      const endTimestamp = Math.floor(endDate.getTime() / 1000);
-
-      this.offset = 0;
-      await this.insertDailyRecord(false, startTimestamp, endTimestamp);
-
-      this.updateProgress(100);
-      logMessage(`${date} 同步完成`, LogLevel.success);
-    } catch (error) {
-      this.syncStatus.lastError = `同步失败: ${error}`;
-      logMessage(`同步失败: ${error}`, LogLevel.error);
-    } finally {
-      this.syncStatus.isSyncing = false;
-    }
+    await this.executeSync(date, startTimestamp, endTimestamp);
   }
 
   /**

@@ -4,8 +4,6 @@ import { MemosSettings, DEFAULT_MEMOS_SETTINGS } from "./settings";
 
 import { DailyRecord } from './DailyRecord';
 
-import axios, { Axios } from 'axios';
-
 /**
  * SyncMemos 插件主类
  * 负责插件的生命周期管理和设置界面
