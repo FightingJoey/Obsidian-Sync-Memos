@@ -1,52 +1,113 @@
 # Obsidian Sync Memos
 
-一个用于将云端 Memos 同步到 Obsidian 日记中的插件，可与 Thino 插件配合使用。
+这是一个用于将 [Memos](https://github.com/usememos/memos) 同步到 Obsidian 的插件。
 
 ## 功能特点
 
-- 将云端 Memos 内容同步到 Obsidian 日记中
-- 支持自定义同步标题位置
+- 自动同步 Memos 到 Obsidian 日记中
+- 支持增量同步，只同步新的 Memos
+- 支持多种同步模式：
+  - 同步今日 Memos
+  - 同步本周 Memos（从周一开始）
+  - 同步本月 Memos（从 1 号开始）
+  - 同步指定日期的 Memos
+  - 同步当前文件的 Memos（根据文件名 YYYY-MM-DD.md 格式）
+- 支持自定义日记标题和路径
 - 支持自定义时间格式
 - 支持自动创建日记文件
-- 支持与 Thino 插件配合使用
-- 支持手动触发同步
+- 支持日记模板
 
-## 安装方法
+## 安装
 
-1. 在 Obsidian 中打开设置
-2. 进入社区插件
-3. 搜索 "Sync Memos"
-4. 点击安装
-5. 启用插件
+1. 打开 Obsidian 设置
+2. 进入 Community plugins
+3. 关闭 Safe mode
+4. 点击 Browse
+5. 搜索 "Obsidian Sync Memos"
+6. 点击 Install
 
-## 配置说明
+## 配置
 
-在插件设置中需要配置以下内容：
-
-1. **Memos API**：您的 usememos 服务 API 地址
-2. **Memos Token**：您的 usememos 服务 API 令牌
-3. **日记标题**：Memos 内容将插入到哪个标题下
-4. **日记路径**：日记文件的存储路径
-5. **日记模板**：日记文件的模板路径
-6. **时间格式**：可选择 "HH:mm" 或 "HH:mm:ss" 格式
+1. 打开 Obsidian 设置
+2. 进入 Community plugins
+3. 找到 "Obsidian Sync Memos"
+4. 点击设置图标
+5. 配置以下选项：
+   - Memos API：Memos 服务的 API 地址
+   - Memos Token：Memos 服务的访问令牌
+   - Daily Record Header：日记中存储 Memos 的标题
+   - Daily Note Path：日记文件夹路径
+   - Daily Note Template Path：日记模板路径
+   - Time Format：时间格式（HH:mm 或 HH:mm:ss）
 
 ## 使用方法
 
-1. 配置好插件设置后，点击左侧边栏的同步图标即可手动触发同步
-2. 也可以通过命令面板（Command Palette）输入 "Sync Memos" 来触发同步
+### 同步命令
+
+在命令面板（Ctrl/Cmd + P）中可以找到以下命令：
+
+- `同步今日 Memos`：同步今日创建的 Memos
+- `同步本周 Memos`：同步本周一及之后创建的 Memos
+- `同步本月 Memos`：同步本月 1 号及之后创建的 Memos
+- `同步当前文件 Memos`：同步当前打开文件对应日期的 Memos（文件名需为 YYYY-MM-DD.md 格式）
+
+### 自动同步
+
+插件会在以下情况下自动同步：
+
+1. 插件加载时
+2. 设置更改时
+3. 点击工具栏图标时
+
+### 同步规则
+
+1. 增量同步：只同步新的 Memos，避免重复同步
+2. 时间范围：
+   - 今日同步：从今日 00:00:00 开始
+   - 本周同步：从本周一 00:00:00 开始
+   - 本月同步：从本月 1 号 00:00:00 开始
+   - 指定日期同步：从指定日期的 00:00:00 到 23:59:59
+3. 文件格式：
+   - 日记文件名格式：YYYY-MM-DD.md
+   - 支持自动创建日记文件
+   - 支持使用日记模板
 
 ## 注意事项
 
-- 请确保正确配置 Memos API 和 Token
-- 确保日记文件路径和模板路径配置正确
-- 同步时会自动创建不存在的日记文件
-- 同步的内容会按照时间顺序插入到指定标题下
+1. 确保 Memos API 和 Token 配置正确
+2. 确保日记标题和路径配置正确
+3. 如果使用日记模板，确保模板文件存在
+4. 同步过程中请勿关闭 Obsidian
+5. 如果同步失败，请检查网络连接和配置是否正确
+
+## 常见问题
+
+1. 同步失败
+   - 检查 Memos API 和 Token 是否正确
+   - 检查网络连接是否正常
+   - 检查日记标题和路径是否正确
+
+2. 重复同步
+   - 检查是否启用了增量同步
+   - 检查上次同步时间是否正确
+
+3. 文件创建失败
+   - 检查日记路径是否正确
+   - 检查是否有写入权限
+   - 检查模板文件是否存在
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+## 许可证
+
+MIT License
 
 ## 开发信息
 
 - 作者：DevQiaoYu
-- 版本：1.0.3
-- 许可证：MIT
+- 版本：1.0.4
 - 最低 Obsidian 版本要求：1.0.3
 
 ## 技术支持
