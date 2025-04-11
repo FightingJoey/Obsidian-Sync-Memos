@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-sync-memos",
-	"version": "1.0.5",
+	"version": "1.0.4",
 	"description": "将云端 Memos 同步到 Obsidian 日记中，可与 Thino 插件配合使用。",
 	"main": "main.js",
 	"scripts": {

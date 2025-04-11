@@ -1,8 +1,8 @@
 {
 	"id": "obsidian-sync-memos",
 	"name": "Obsidian Sync Memos",
-	"version": "1.0.5",
-	"minAppVersion": "1.0.5",
+	"version": "1.0.4",
+	"minAppVersion": "1.0.4",
 	"description": "将云端 Memos 同步到 Obsidian 日记中，可与 Thino 插件配合使用。",
 	"author": "DevQiaoYu",
 	"authorUrl": "https://github.com/DevQiaoYu",
