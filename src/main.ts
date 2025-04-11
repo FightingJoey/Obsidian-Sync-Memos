@@ -11,11 +11,9 @@ import axios, { Axios } from 'axios';
  * 负责插件的生命周期管理和设置界面
  */
 export default class SyncMemos extends Plugin {
-	settings: MemosSettings;        // 插件设置
-	dailyRecord: DailyRecord;      // 每日记录处理器
-	// timeout: NodeJS.Timeout;
-  	// interval: NodeJS.Timer;
-	file: File;                    // 文件对象
+	settings: MemosSettings = DEFAULT_MEMOS_SETTINGS;        // 插件设置
+	dailyRecord!: DailyRecord;      // 每日记录处理器
+	file!: File;                    // 文件对象
 
 	/**
 	 * 插件加载时的初始化
@@ -46,6 +44,24 @@ export default class SyncMemos extends Plugin {
 			}
 		});
 
+		// 添加同步本周记录命令
+		this.addCommand({
+			id: 'sync-week-memos',
+			name: 'Sync Week Memos',
+			callback: () => {
+				this.dailyRecord.syncWeek();
+			}
+		});
+
+		// 添加同步本月记录命令
+		this.addCommand({
+			id: 'sync-month-memos',
+			name: 'Sync Month Memos',
+			callback: () => {
+				this.dailyRecord.syncMonth();
+			}
+		});
+
 		this.loadDailyRecord();
 
 		// 添加设置页面
@@ -56,8 +72,6 @@ export default class SyncMemos extends Plugin {
 	 * 插件卸载时的清理
 	 */
 	onunload() {
-		// clearTimeout(this.timeout);
-		// clearInterval(this.interval);
 	}
 
 	/**
@@ -82,17 +96,6 @@ export default class SyncMemos extends Plugin {
 			this.app,
 			this.settings
 		);
-
-		// clearTimeout(this.timeout);
-		// clearInterval(this.interval);
-
-		// // sync on start
-		// this.timeout = setTimeout(() => this.dailyRecord.sync(), 15 * 1000);
-		// // sync every 0.5 hour
-		// this.interval = setInterval(
-		//   () => this.dailyRecord.sync(),
-		//   0.5 * 60 * 60 * 1000
-		// );
 	}
 }
 
@@ -139,12 +142,8 @@ class SyncMemosSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.memosToken)
 				.onChange(async (value) => {
 					this.plugin.settings.memosToken = value;
-					this.plugin.dailyRecord.axios = axios.create({
-				      headers: {
-				        Authorization: `Bearer ${value}`,
-				        Accept: 'application/json',
-				      },
-				    });
+					// 重新初始化 DailyRecord 实例以更新 token
+					this.plugin.loadDailyRecord();
 					await this.plugin.saveSettings();
 				}));
 

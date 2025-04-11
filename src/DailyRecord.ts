@@ -145,8 +145,34 @@ export class DailyRecord {
   }
 
   /**
-   * 同步当日记录
-   * 只同步今天创建的 Memos
+   * 获取本周开始时间戳（秒级）
+   * 从周一开始计算
+   * @returns 返回本周一 00:00:00 的时间戳
+   */
+  private getWeekStartTimestamp(): number {
+    const today = new Date();
+    const day = today.getDay();
+    // 将周日(0)转换为7，便于计算
+    const diff = day === 0 ? 6 : day - 1;
+    today.setDate(today.getDate() - diff);
+    today.setHours(0, 0, 0, 0);
+    return Math.floor(today.getTime() / 1000);
+  }
+
+  /**
+   * 获取本月开始时间戳（秒级）
+   * @returns 返回本月1号 00:00:00 的时间戳
+   */
+  private getMonthStartTimestamp(): number {
+    const today = new Date();
+    today.setDate(1);
+    today.setHours(0, 0, 0, 0);
+    return Math.floor(today.getTime() / 1000);
+  }
+
+  /**
+   * 同步今日记录
+   * 只同步今日创建的 Memos
    */
   public async syncToday(): Promise<void> {
     if (this.syncStatus.isSyncing) {
@@ -167,7 +193,71 @@ export class DailyRecord {
       await this.insertDailyRecord(true);
 
       this.updateProgress(100);
-      logMessage("当日同步完成", LogLevel.success);
+      logMessage("今日同步完成", LogLevel.success);
+    } catch (error) {
+      this.syncStatus.lastError = `同步失败: ${error}`;
+      logMessage(`同步失败: ${error}`, LogLevel.error);
+    } finally {
+      this.syncStatus.isSyncing = false;
+    }
+  }
+
+  /**
+   * 同步本周记录
+   * 只同步本周一及之后创建的 Memos
+   */
+  public async syncWeek(): Promise<void> {
+    if (this.syncStatus.isSyncing) {
+      logMessage("同步正在进行中", LogLevel.warning);
+      return;
+    }
+
+    try {
+      this.syncStatus.isSyncing = true;
+      this.syncStatus.lastError = null;
+      this.updateProgress(0);
+
+      if (!this.validateSettings()) {
+        return;
+      }
+
+      this.offset = 0;
+      await this.insertDailyRecord(false, this.getWeekStartTimestamp());
+
+      this.updateProgress(100);
+      logMessage("本周同步完成", LogLevel.success);
+    } catch (error) {
+      this.syncStatus.lastError = `同步失败: ${error}`;
+      logMessage(`同步失败: ${error}`, LogLevel.error);
+    } finally {
+      this.syncStatus.isSyncing = false;
+    }
+  }
+
+  /**
+   * 同步本月记录
+   * 只同步本月1号及之后创建的 Memos
+   */
+  public async syncMonth(): Promise<void> {
+    if (this.syncStatus.isSyncing) {
+      logMessage("同步正在进行中", LogLevel.warning);
+      return;
+    }
+
+    try {
+      this.syncStatus.isSyncing = true;
+      this.syncStatus.lastError = null;
+      this.updateProgress(0);
+
+      if (!this.validateSettings()) {
+        return;
+      }
+
+      this.offset = 0;
+      await this.insertDailyRecord(false, this.getMonthStartTimestamp());
+
+      this.updateProgress(100);
+      logMessage("本月同步完成", LogLevel.success);
     } catch (error) {
       this.syncStatus.lastError = `同步失败: ${error}`;
       logMessage(`同步失败: ${error}`, LogLevel.error);
@@ -179,8 +269,9 @@ export class DailyRecord {
   /**
    * 插入每日记录
    * @param todayOnly 是否只同步今日记录
+   * @param startTimestamp 开始时间戳（秒级），用于限制同步范围
    */
-  private async insertDailyRecord(todayOnly: boolean = false): Promise<void> {
+  private async insertDailyRecord(todayOnly: boolean = false, startTimestamp?: number): Promise<void> {
     const header = this.settings.dailyRecordHeader;
     const dailyRecordByDay: Record<string, DailyRecordData> = {};
     const records = await this.fetch();
@@ -193,6 +284,7 @@ export class DailyRecord {
     let hasNewRecords = false;
     const lastTimeInSeconds = Number(this.lastTime) || 0;
     const todayStartTimestamp = todayOnly ? this.getTodayStartTimestamp() : 0;
+    const effectiveStartTimestamp = startTimestamp || todayStartTimestamp;
 
     // 处理每条记录
     for (const record of records) {
@@ -202,8 +294,8 @@ export class DailyRecord {
 
       const recordTimestamp = record.createdTs;
       
-      // 如果是仅同步今日，检查记录是否是今天的
-      if (todayOnly && recordTimestamp < todayStartTimestamp) {
+      // 检查记录是否在指定的时间范围内
+      if (recordTimestamp < effectiveStartTimestamp) {
         continue;
       }
 
@@ -245,7 +337,7 @@ export class DailyRecord {
 
     // 继续处理下一页
     this.offset += this.limit;
-    await this.insertDailyRecord(todayOnly);
+    await this.insertDailyRecord(todayOnly, startTimestamp);
   }
 
   /**
